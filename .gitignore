@@ -1,0 +1,4 @@
+dataset/
+venv/
+__pycache__/git add .
+.ipynb_checkpoints/
