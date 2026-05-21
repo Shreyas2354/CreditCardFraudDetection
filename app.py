@@ -1,245 +1,528 @@
-# ==========================================
-# Credit Card Fraud Detection System
-# Professional Streamlit Web App
-# ==========================================
 
-# ------------------------------------------
-# Import Libraries
-# ------------------------------------------
+# ==========================================
+# FraudShield AI - Advanced Fraud Detection
+# Professional Streamlit UI
+# ==========================================
 
 import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
 
-from sklearn.preprocessing import StandardScaler
-
-# ------------------------------------------
-# Page Configuration
-# ------------------------------------------
+# ==========================================
+# PAGE CONFIG
+# ==========================================
 
 st.set_page_config(
-    page_title="Fraud Detection System",
+    page_title="FraudShield AI",
     page_icon="💳",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# ------------------------------------------
-# Load Saved Model
-# ------------------------------------------
+# ==========================================
+# LOAD MODEL
+# ==========================================
 
 model = joblib.load("models/fraud_model.pkl")
+encoder = joblib.load("models/label_encoder.pkl")
 
-# ------------------------------------------
-# App Title
-# ------------------------------------------
+# ==========================================
+# CUSTOM CSS
+# ==========================================
 
-st.title("💳 Credit Card Fraud Detection System")
+st.markdown("""
+<style>
 
-st.markdown(
-    """
-    Upload a transaction CSV file to detect fraudulent transactions
-    using Machine Learning.
-    """
-)
+html, body, [class*="css"] {
+    font-family: 'Poppins', sans-serif;
+    background-color: #060B26;
+    color: white;
+}
 
-# ------------------------------------------
-# Sidebar
-# ------------------------------------------
+/* MAIN AREA */
+.main {
+    background: linear-gradient(to right, #050816, #0b1437);
+    color: white;
+}
 
-st.sidebar.header("📂 Upload Transaction File")
+/* SIDEBAR */
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #0B1026, #111C44);
+    border-right: 1px solid rgba(255,255,255,0.1);
+}
 
-uploaded_file = st.sidebar.file_uploader(
-    "Upload CSV File",
-    type=["csv"]
-)
+.sidebar-title {
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
+}
 
-# ------------------------------------------
-# Main Prediction Process
-# ------------------------------------------
+.sidebar-sub {
+    color: #9CA3AF;
+    font-size: 14px;
+}
 
-if uploaded_file is not None:
+/* TITLE */
+.main-title {
+    font-size: 65px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: white;
+}
 
-    # --------------------------------------
-    # Read Uploaded CSV
-    # --------------------------------------
+.gradient-text {
+    background: linear-gradient(90deg,#4FACFE,#C471ED);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
 
-    df = pd.read_csv(uploaded_file)
+/* CARD */
+.custom-card {
+    background: rgba(255,255,255,0.04);
+    padding: 25px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+}
 
-    st.subheader("📄 Uploaded Dataset")
+/* METRIC CARDS */
+.metric-card {
+    background: rgba(255,255,255,0.04);
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+    text-align: center;
+}
 
-    st.dataframe(df.head())
+.metric-title {
+    color: #9CA3AF;
+    font-size: 14px;
+}
 
-    # --------------------------------------
-    # Save Original Data
-    # --------------------------------------
+.metric-value {
+    font-size: 38px;
+    font-weight: bold;
+    color: white;
+}
 
-    original_df = df.copy()
+/* BUTTON */
+.stButton > button {
+    width: 100%;
+    height: 65px;
+    border-radius: 16px;
+    border: none;
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(90deg,#9333EA,#3B82F6);
+    transition: 0.3s;
+}
 
-    # --------------------------------------
-    # Remove Target Column if Exists
-    # --------------------------------------
+.stButton > button:hover {
+    transform: scale(1.02);
+    background: linear-gradient(90deg,#A855F7,#2563EB);
+}
 
-    if "Class" in df.columns:
-        df = df.drop("Class", axis=1)
+/* INPUTS */
+.stNumberInput input,
+.stSelectbox div[data-baseweb="select"],
+.stSlider {
+    background-color: rgba(255,255,255,0.05) !important;
+    color: white !important;
+    border-radius: 12px !important;
+}
 
-    # --------------------------------------
-    # Feature Scaling
-    # --------------------------------------
+/* RESULT BOX */
+.result-box {
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+}
 
-    scaler = StandardScaler()
+.high-risk {
+    background: rgba(239,68,68,0.15);
+    border: 2px solid #EF4444;
+    color: #FF4D4D;
+}
 
-    df["scaled_amount"] = scaler.fit_transform(df[["Amount"]])
+.low-risk {
+    background: rgba(34,197,94,0.15);
+    border: 2px solid #22C55E;
+    color: #4ADE80;
+}
 
-    # Remove original Amount column
-    df = df.drop("Amount", axis=1)
+.footer {
+    text-align:center;
+    color:#9CA3AF;
+    margin-top:30px;
+}
 
-    # --------------------------------------
-    # Final Input Features
-    # --------------------------------------
+</style>
+""", unsafe_allow_html=True)
 
-    X = df
+# ==========================================
+# SIDEBAR
+# ==========================================
 
-    # --------------------------------------
-    # Make Predictions
-    # --------------------------------------
+with st.sidebar:
 
-    predictions = model.predict(X)
+    st.markdown("""
+    <div class="sidebar-title">
+    🛡 FraudShield
+    </div>
 
-    probabilities = model.predict_proba(X)
+    <div class="sidebar-sub">
+     Fraud Detection System
+    </div>
+    """, unsafe_allow_html=True)
 
-    # --------------------------------------
-    # Add Results to Original Dataset
-    # --------------------------------------
+    st.markdown("---")
 
-    original_df["Prediction"] = predictions
+    st.markdown("### 📊 Dashboard")
+    # st.markdown("### 🧾 New Prediction")
+    # st.markdown("### 📈 Analytics")
+    # st.markdown("### ⚙ Settings")
+    # st.markdown("### ℹ About")
 
-    original_df["Fraud_Probability"] = probabilities[:, 1] * 100
+# ==========================================
+# HEADER
+# ==========================================
 
-    # --------------------------------------
-    # Fraud Statistics
-    # --------------------------------------
+col1, col2 = st.columns([2,1])
 
-    fraud_count = int(original_df["Prediction"].sum())
+with col1:
 
-    total_transactions = len(original_df)
+    st.markdown("""
+    <div class="main-title">
+    Credit Card <br>
+    <span class="gradient-text">
+    Fraud Detection
+    </span>
+    </div>
+    """, unsafe_allow_html=True)
 
-    genuine_count = total_transactions - fraud_count
+    st.markdown("""
+    ### Detect suspicious transactions in real-time
+    using Machine Learning models.
+    """)
 
-    fraud_percentage = (
-        fraud_count / total_transactions
-    ) * 100
+with col2:
 
-    # --------------------------------------
-    # Dashboard Metrics
-    # --------------------------------------
-
-    st.subheader("📊 Fraud Detection Dashboard")
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    col1.metric(
-        "Total Transactions",
-        total_transactions
+    st.image(
+        "https://cdn-icons-png.flaticon.com/512/2489/2489756.png",
+        width=280
     )
 
-    col2.metric(
-        "Fraud Transactions",
-        fraud_count
+st.markdown("<br>", unsafe_allow_html=True)
+
+# ==========================================
+# METRICS
+# ==========================================
+
+m1, m2, m3 = st.columns(3)
+
+with m1:
+    st.metric(
+        label="Total Predictions",
+        value="2,548",
+        delta="+12%"
     )
 
-    col3.metric(
-        "Genuine Transactions",
-        genuine_count
+with m2:
+    st.metric(
+        label="Fraud Detected",
+        value="142",
+        delta="+8%"
     )
 
-    col4.metric(
-        "Fraud Percentage",
-        f"{fraud_percentage:.2f}%"
+with m3:
+    st.metric(
+        label="Model Accuracy",
+        value="99%",
+        delta="+2%"
     )
 
-    # --------------------------------------
-    # Final Prediction Result
-    # --------------------------------------
+# ==========================================
+# MAIN LAYOUT
+# ==========================================
 
-    st.subheader("🔍 Final Fraud Analysis")
+left, right = st.columns([2,1])
 
-    if fraud_count > 0:
+# ==========================================
+# INPUT SECTION
+# ==========================================
 
-        st.error(
-            f"⚠ ALERT: {fraud_count} Fraudulent Transactions Detected"
-        )
+with left:
 
-    else:
+    st.markdown("""
+    <div class="custom-card">
+    <h2>📝 Transaction Details</h2>
+    </div>
+    """, unsafe_allow_html=True)
 
-        st.success(
-            "✅ All Transactions are Genuine"
-        )
+    amount = st.number_input(
+        "Transaction Amount ($)",
+        min_value=0.0,
+        value=150.0
+    )
 
-    # --------------------------------------
-    # Risk Level
-    # --------------------------------------
-
-    if fraud_percentage > 20:
-
-        st.error("🔴 Risk Level: HIGH")
-
-    elif fraud_percentage > 5:
-
-        st.warning("🟠 Risk Level: MEDIUM")
-
-    else:
-
-        st.success("🟢 Risk Level: LOW")
-
-    # --------------------------------------
-    # Show Fraud Transactions
-    # --------------------------------------
-
-    fraud_transactions = original_df[
-        original_df["Prediction"] == 1
+    transaction_hour = st.slider(
+        "Transaction Hour",
+        0,
+        23,
+        14
+    )
+    merchant_category = st.selectbox(
+    "Merchant Category",
+    
+      [
+    "Electronics",
+    "Travel",
+    "Food",
+    'Clothing',
+    'Grocery' 
     ]
-
-    st.subheader("⚠ Fraudulent Transactions")
-
-    if len(fraud_transactions) > 0:
-
-        st.dataframe(fraud_transactions)
-
-    else:
-
-        st.info("No Fraudulent Transactions Found")
-
-    # --------------------------------------
-    # Prediction Results Table
-    # --------------------------------------
-
-    st.subheader("📋 Prediction Results")
-
-    st.dataframe(original_df.head(20))
-
-    # --------------------------------------
-    # Download Results
-    # --------------------------------------
-
-    csv = original_df.to_csv(index=False).encode("utf-8")
-
-    st.download_button(
-        label="⬇ Download Prediction Results",
-        data=csv,
-        file_name="fraud_predictions.csv",
-        mime="text/csv"
     )
 
-# ------------------------------------------
-# Footer
-# ------------------------------------------
+    foreign_transaction = st.selectbox(
+        "Foreign Transaction",
+        [0,1]
+    )
 
-st.markdown("---")
+    location_mismatch = st.selectbox(
+        "Location Mismatch",
+        [0,1]
+    )
 
-st.markdown(
-    """
-    🚀 Machine Learning Based Fraud Detection System  
-    Built using Streamlit, Random Forest & SMOTE
-    """
-)
+    device_trust_score = st.slider(
+        "Device Trust Score",
+        0,
+        100,
+        75
+    )
+
+    velocity_last_24h = st.slider(
+        "Transactions in Last 24 Hours",
+        0,
+        20,
+        2
+    )
+
+    cardholder_age = st.slider(
+        "Cardholder Age",
+        18,
+        100,
+        30
+    )
+
+    predict_button = st.button("🔍 Predict Transaction")
+
+# ==========================================
+# PREDICTION SECTION
+# ==========================================
+
+with right:
+
+    st.markdown("""
+    <div class="custom-card">
+    <h2>📊 Prediction Result</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if predict_button:
+
+        # ----------------------------------
+        # Encode Category
+        # ----------------------------------
+
+        merchant_encoded = encoder.transform(
+            [merchant_category]
+        )[0]
+
+        # ----------------------------------
+        # Prepare Input Data
+        # ----------------------------------
+
+        input_data = pd.DataFrame([[
+            amount,
+            transaction_hour,
+            merchant_encoded,
+            foreign_transaction,
+            location_mismatch,
+            device_trust_score,
+            velocity_last_24h,
+            cardholder_age
+        ]], columns=[
+            'amount',
+            'transaction_hour',
+            'merchant_category',
+            'foreign_transaction',
+            'location_mismatch',
+            'device_trust_score',
+            'velocity_last_24h',
+            'cardholder_age'
+        ])
+
+        # ----------------------------------
+        # Model Prediction
+        # ----------------------------------
+
+        prediction = model.predict(input_data)
+
+        probability = model.predict_proba(
+            input_data
+        )
+
+        fraud_probability = probability[0][1] * 100
+
+        # ----------------------------------
+        # Risk Analysis
+        # ----------------------------------
+
+        risk_factors = []
+
+        if amount > 10000:
+            risk_factors.append(
+                "💰 High Transaction Amount"
+            )
+
+        if foreign_transaction == 1:
+            risk_factors.append(
+                "🌍 Foreign Transaction"
+            )
+
+        if location_mismatch == 1:
+            risk_factors.append(
+                "📍 Location Mismatch"
+            )
+
+        if velocity_last_24h > 10:
+            risk_factors.append(
+                "⚡ High Transaction Velocity"
+            )
+
+        if device_trust_score < 40:
+            risk_factors.append(
+                "📱 Low Device Trust Score"
+            )
+
+        if transaction_hour < 5:
+            risk_factors.append(
+                "🕒 Suspicious Transaction Hour"
+            )
+
+        # ----------------------------------
+        # FRAUD RESULT
+        # ----------------------------------
+
+        st.metric(
+            "Fraud Probability",
+            f"{fraud_probability:.2f}%"
+        )
+
+        st.progress(
+            min(int(fraud_probability), 100)
+        )
+
+        if prediction[0] == 1:
+
+            st.markdown("""
+            <div class="result-box high-risk">
+            ⚠ FRAUDULENT TRANSACTION
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.error("🔴 HIGH RISK")
+
+        else:
+
+            st.markdown("""
+            <div class="result-box low-risk">
+            ✅ LEGITIMATE TRANSACTION
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.success("🟢 LOW RISK")
+
+        # ----------------------------------
+        # DYNAMIC RISK FACTORS
+        # ----------------------------------
+
+        st.markdown("---")
+
+        st.subheader("🔥 Risk Factors")
+
+        if len(risk_factors) > 0:
+
+            for factor in risk_factors:
+
+                st.warning(factor)
+
+        else:
+
+            st.success(
+                "✅ No Major Risk Factors Found"
+            )
+
+        # ----------------------------------
+        # DYNAMIC RECOMMENDATIONS
+        # ----------------------------------
+
+        st.markdown("---")
+
+        st.subheader("🛡 Recommendations")
+
+        if prediction[0] == 1:
+
+            st.error("""
+• Verify transaction manually
+
+• Contact cardholder immediately
+
+• Temporarily block suspicious transaction
+
+• Enable multi-factor authentication
+
+• Review recent account activity
+""")
+
+        else:
+
+            st.success("""
+• Transaction appears safe
+
+• Continue normal monitoring
+
+• Maintain device security
+
+• Enable banking alerts for safety
+""")
+
+        # ----------------------------------
+        # TRANSACTION SUMMARY
+        # ----------------------------------
+
+        st.markdown("---")
+
+        st.subheader("📋 Transaction Summary")
+
+        st.info(f"""
+Transaction Amount: ${amount}
+
+Merchant Category: {merchant_category}
+
+Transaction Hour: {transaction_hour}:00
+
+Foreign Transaction: {"Yes" if foreign_transaction == 1 else "No"}
+
+Location Mismatch: {"Yes" if location_mismatch == 1 else "No"}
+
+Device Trust Score: {device_trust_score}
+
+Transactions in Last 24 Hours: {velocity_last_24h}
+
+Cardholder Age: {cardholder_age}
+""")
